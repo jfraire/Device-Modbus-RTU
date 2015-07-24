@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More;
+use Test::More tests => 8;
 
 BEGIN {
     use_ok 'Device::Modbus::RTU::ADU';

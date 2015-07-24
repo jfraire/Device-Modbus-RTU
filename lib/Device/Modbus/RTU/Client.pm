@@ -23,7 +23,7 @@ sub new {
 sub build_adu {
     my ($self, $request) = @_;
     croak "Please include a unit number in the request."
-        unless exists $request->{unit} && $request->{unit};
+        unless $request->{unit};
     my $header = $self->build_header($request);
     my $pdu    = $request->pdu();
     my $footer = $self->build_footer($header, $pdu);

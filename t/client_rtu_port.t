@@ -1,40 +1,54 @@
 #! /usr/bin/env perl
 
-use lib 't/lib', '../../Test-Device-SerialPort/lib';
+use lib 't/lib';
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 7;
 
 BEGIN {
     use_ok 'Device::Modbus::RTU::Client';
 }
 
+# Loads the fake serial port from t/lib
 my $client = Device::Modbus::RTU::Client->new( port => 'test' );
 isa_ok $client->{port}, 'Test::Device::SerialPort';
 
-my @responses = (
-    '060103cd6b05',              # Read coils, 24 values, unit 0x06
-    '140203acdb35',              # Read discrete inputs, 24 values, unit 0x16
-    '030306022b00000064',        # Read holding registers, 3 values, unit 0x03
-);
-
-my @adus;
-foreach my $resp (@responses) {
-    my $pdu = pack 'H*', $resp;
-    my $crc = Device::Modbus::RTU::Client->crc_for($pdu);
-    push @adus, $pdu . $crc;
+{
+    $client->write_port('AAA');
+    is $client->{port}{_tx_buf}, 'AAA',
+        'Writing to the serial port should work';
+    is $client->disconnect, 1,
+        'Disconnecting the serial port should work';
+}
+{
+    $client->{port}->mock_messages(pack 'H*', '123');
+    my $out;
+    eval {
+        $out = $client->read_port(4, 'H*');
+    };
+    like $@, qr/Timeout/,
+        'The serial port should return a time out error';
 }
 
-$client->{port}->mock_messages(@adus);
-
 {
-    my $adu = $client->receive_response;
-    ok $adu->success,                    'Parsed ADU without error';
-    is $adu->unit, 0x06,                 'Unit value retrieved is 0x06';
-    is $adu->function, 'Read Coils',     'Function is 0x01';
-    is_deeply [$adu->values], [0,0,1,1,0,1,0,1, 1,1,0,1,1,0,1,1, 1,0,1,0,1,1,0,0],
-        'Values retrieved correctly';
+    eval {
+        my $client2 = Device::Modbus::RTU::Client->new;
+    };
+    like $@, qr/'port' is required/,
+        'A port is required to instantiate a new RTU client';
+}
+{
+    my $client3 = Device::Modbus::RTU::Client->new(
+        port     => 'COM1',
+        baudrate => 19400,
+        parity   => 'odd',
+        databits => 8,
+        stopbits => 1,
+        timeout  => 2
+    );
+
+    isa_ok $client3, 'Device::Modbus::Client';
 }
 
 done_testing();
