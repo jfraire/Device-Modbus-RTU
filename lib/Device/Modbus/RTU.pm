@@ -1,5 +1,6 @@
 package Device::Modbus::RTU;
 
+use Device::Modbus::RTU::ADU;
 use Device::SerialPort;
 use Carp;
 use strict;
@@ -62,10 +63,9 @@ sub read_port {
         my ($bytes, $read) = $self->{port}->read($bytes_qty);
         if ($bytes) {
             $message .= $read;
+            last;
         }
         
-        last if length($message) == $bytes_qty; 
-
         $timeout -= $self->{port}->read_const_time + $bytes * $self->{char_time};
     }
     croak 'Timeout reading from port' unless $timeout > 0;
@@ -76,8 +76,6 @@ sub ignore_port {
     my $self = shift;
     $self->{port}->read(255);
 }
-    
-
 
 sub write_port {
     my ($self, $adu) = @_;
