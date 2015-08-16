@@ -20,22 +20,23 @@ BEGIN {
 
     isa_ok $request, 'Device::Modbus::Request';
 
-    my $header = Device::Modbus::RTU::Client->build_header($request);
+    my $adu = Device::Modbus::RTU::Client->new_adu($request);
+
+    my $header = $adu->build_header;
     is ord($header), 3,
         'The header of the Modbus message is the unit number';
 
-    my $footer = Device::Modbus::RTU::Client->build_footer(chr(2),chr(7));
+    my $footer = $adu->build_footer(chr(2),chr(7));
     is_deeply [unpack 'CC', $footer], [0x41,0x12],
         'CRC is according to the example in Modbus specification';
 
-    my $adu = Device::Modbus::RTU::Client->build_adu($request);
-    my $pdu_string = unpack 'H*', $adu;
+    my $pdu_string = unpack 'H*', $adu->binary_message;
     is $pdu_string, '0301001300138de0',
         'PDU for Read Coils function is as expected';
 }
 
 {
-    my $footer = Device::Modbus::RTU::Client->build_footer(pack('H*', '010402FFFF'), '');
+    my $footer = Device::Modbus::RTU::ADU->build_footer(pack('H*', '010402FFFF'), '');
     is_deeply [unpack 'CC', $footer], [0xB8, 0x80],
         'CRC is according to the example in Wikipedia';
 }
@@ -48,14 +49,15 @@ BEGIN {
     );
 
     eval {
-        my $adu = Device::Modbus::RTU::Client->build_adu($req);
+        my $adu = Device::Modbus::RTU::Client->new_adu($req);
+        $adu->binary_message;
     };
     like $@, qr/unit number/,
         'Clients cannot write an ADU without unit number';
 }
 
 {
-    # Croaks if units are not defined
+    # Croaks for unit 0
     my $req = Device::Modbus::RTU::Client->read_coils(
         unit     => 0,
         address  => 19,
@@ -63,9 +65,9 @@ BEGIN {
     );
 
     eval {
-        my $adu = Device::Modbus::RTU::Client->build_adu($req);
+        my $adu = Device::Modbus::RTU::Client->new_adu($req);
     };
-    like $@, qr/unit number/,
+    like $@, qr/Unit number/,
         'Clients cannot write an ADU for unit zero';
 }
 
@@ -76,7 +78,7 @@ isa_ok $client->{port}, 'Test::Device::SerialPort';
 {
     my $response = '0103cd6b05';          # Read coils
     my $pdu = pack 'H*', "06$response";   # Unit 6
-    my $crc = Device::Modbus::RTU::Client->crc_for($pdu);
+    my $crc = Device::Modbus::RTU::ADU->crc_for($pdu);
     my $adu = $pdu . $crc;
     $client->{port}->mock_messages($adu);
     my $resp_adu = $client->receive_response;

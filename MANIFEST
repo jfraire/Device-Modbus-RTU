@@ -1,0 +1,15 @@
+Changes
+examples/simple_client_rtu.pl
+lib/Device/Modbus/RTU.pm
+lib/Device/Modbus/RTU/ADU.pm
+lib/Device/Modbus/RTU/Client.pm
+lib/Device/Modbus/RTU/Server.pm
+LICENSE
+Makefile.PL
+MANIFEST			This list of files
+README.pod
+t/adu_rtu.t
+t/client_rtu.t
+t/client_rtu_port.t
+t/lib/Device/SerialPort.pm
+t/server_rtu.t

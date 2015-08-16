@@ -15,8 +15,16 @@ my $client = Device::Modbus::RTU::Client->new( port => 'test' );
 isa_ok $client->{port}, 'Test::Device::SerialPort';
 
 {
-    $client->write_port('AAA');
-    is $client->{port}{_tx_buf}, 'AAA',
+    my $request = Device::Modbus::RTU::Client->read_coils(
+        unit     =>  3,
+        address  => 19,
+        quantity => 19
+    );
+
+    my $adu = Device::Modbus::RTU::Client->new_adu($request);
+
+    $client->write_port($adu);
+    is $client->{port}{_tx_buf}, $adu->binary_message,
         'Writing to the serial port should work';
     is $client->disconnect, 1,
         'Disconnecting the serial port should work';
