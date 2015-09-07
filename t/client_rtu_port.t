@@ -4,7 +4,7 @@ use lib 't/lib';
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More tests => 6;
 
 BEGIN {
     use_ok 'Device::Modbus::RTU::Client';
@@ -29,16 +29,6 @@ isa_ok $client->{port}, 'Test::Device::SerialPort';
     is $client->disconnect, 1,
         'Disconnecting the serial port should work';
 }
-{
-    $client->{port}->mock_messages(pack 'H*', '123');
-    my $out;
-    eval {
-        $out = $client->read_port(4, 'H*');
-    };
-    like $@, qr/Timeout/,
-        'The serial port should return a time out error';
-}
-
 {
     eval {
         my $client2 = Device::Modbus::RTU::Client->new;

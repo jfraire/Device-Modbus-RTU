@@ -49,27 +49,14 @@ sub open_port {
 
     $serial->write_settings || croak "Unable to open port: $!";
     $serial->purge_all;
-    $SIG{INT} = sub { $serial->close; die "Good bye\n"; };
     $self->{port} = $serial;
     return $serial;
 }
 
 sub read_port {
     my ($self, $bytes_qty, $pattern) = @_;
-
-    my $timeout = 1000 * $self->{timeout};
-    my $message = '';
-    while ($timeout > 0) {
-        my ($bytes, $read) = $self->{port}->read($bytes_qty);
-        if ($bytes) {
-            $message .= $read;
-            last;
-        }
-        
-        $timeout -= $self->{port}->read_const_time + $bytes * $self->{char_time};
-    }
-    croak 'Timeout reading from port' unless $timeout > 0;
-    return unpack $pattern, $message;
+    my ($bytes, $read) = $self->{port}->read($bytes_qty);
+    return unpack $pattern, $read;
 }
 
 sub ignore_port {
@@ -103,7 +90,15 @@ sub new_adu {
 
 sub parse_header {
     my ($self, $adu) = @_;
-    my $unit = $self->read_port(1, 'C');
+    my $timeout = 1000 * $self->{timeout};
+    my $unit;
+    while ($timeout > 0) {
+        $unit = $self->read_port(1, 'C');
+        last if $unit;
+        $timeout -= $self->{port}->read_const_time + $self->{char_time};
+    }
+    croak "Timeout reading from port" unless $timeout > 0;
+
     $adu->unit($unit);
     return $adu;
 }
