@@ -13,10 +13,10 @@ my $client = Device::Modbus::RTU::Client->new(
     parity   => 'none',
 );
 
-my $req = $client->read_holding_registers(
+my $req = $client->write_single_register(
     unit     => 3,
-    address  => 0,
-    quantity => 2
+    address  => 1,
+    value    => 200
 );
 
 say "->" . Dumper $req;

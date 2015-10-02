@@ -55,13 +55,16 @@ sub open_port {
 
 sub read_port {
     my ($self, $bytes_qty, $pattern) = @_;
-    my ($bytes, $read) = $self->{port}->read($bytes_qty);
+    my $timeout = 1000 * $self->{timeout};
+    my $bytes;
+    my $read;
+    while ($timeout > 0) {
+        ($bytes, $read) = $self->{port}->read($bytes_qty);
+        last if $bytes == $bytes_qty;
+        $timeout -= $self->{port}->read_const_time + $bytes * $self->{char_time};
+    }
+    croak "Timeout reading from port" unless $timeout > 0;
     return unpack $pattern, $read;
-}
-
-sub ignore_port {
-    my $self = shift;
-    $self->{port}->read(255);
 }
 
 sub write_port {
@@ -90,15 +93,7 @@ sub new_adu {
 
 sub parse_header {
     my ($self, $adu) = @_;
-    my $timeout = 1000 * $self->{timeout};
-    my $unit;
-    while ($timeout > 0) {
-        $unit = $self->read_port(1, 'C');
-        last if $unit;
-        $timeout -= $self->{port}->read_const_time + $self->{char_time};
-    }
-    croak "Timeout reading from port" unless $timeout > 0;
-
+    my $unit = $self->read_port(1, 'C');
     $adu->unit($unit);
     return $adu;
 }
