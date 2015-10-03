@@ -14,7 +14,7 @@ with 'Device::Modbus::RTU';
 sub new {
     my ($class, %args) = @_;
 
-    my $self = $class->proto(%args);
+    my $self = bless { %{$class->proto}, %args}, $class;
 
     $SIG{INT} = sub {
         $self->log(2, 'Server is shutting down');

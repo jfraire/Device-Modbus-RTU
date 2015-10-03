@@ -26,7 +26,7 @@ Currently, the distribution is under development, and it is in the process of be
 
 =back
 
-As of today, none of the above have been reached.
+As of today, simple clients and servers both with Modbus RTU and Modbus TCP have been tested. Only the Modbus RTU clients have been tested with industrial equipment.
 
 =head2 INSTALLATION
 
