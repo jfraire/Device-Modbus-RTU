@@ -1,6 +1,5 @@
 #! /usr/bin/env perl
 
-use Device::Modbus;
 use Device::Modbus::RTU::Client;
 use Data::Dumper;
 use strict;

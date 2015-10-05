@@ -3,7 +3,7 @@ package Device::Modbus::RTU::Server;
 use parent 'Device::Modbus::Server';
 use Try::Tiny;
 use Role::Tiny::With;
-
+use Data::Dumper;
 use Carp;
 use strict;
 use warnings;
@@ -36,25 +36,26 @@ sub start {
     $self->open_port;
     $self->{running} = 1;
 
+    my $error;
     while ($self->{running}) {
         my $req_adu;
         my $redo = 0;
         try {
             $req_adu = $self->receive_request;
-            $self->log(4, 'Received a request');
-            $self->log(4, "> $req");
+            $self->log(4, "> " . Dumper $req_adu);
         }
         catch {
-            $redo++;
             unless ($_ =~ /^Timeout/) {
                 $self->log(2, "Error while receiving a request: $_");
+                $redo++;
             }
+            $error = $_;
         };
         next if $redo;
 
         # If it is an exception object, we're done
         if ($req_adu->message->isa('Device::Modbus::Exception')) {
-            $self->log(3, "Exception while waiting for requests: $_");
+            $self->log(3, "Exception while waiting for requests: $error");
             $self->write_port($req_adu);
             next;
         }
@@ -63,7 +64,7 @@ sub start {
         my $resp = $self->modbus_server($req_adu);
         my $resp_adu = $self->new_adu($resp);
         $resp_adu->unit($req_adu->unit);
-        $self->log(4, "< Response: $resp_adu");
+        $self->log(4, "< " . Dumper $resp_adu);
     
         # And send the response!
         $self->write_port($resp_adu);

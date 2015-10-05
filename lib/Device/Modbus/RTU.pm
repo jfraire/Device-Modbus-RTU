@@ -64,6 +64,7 @@ sub read_port {
         $timeout -= $self->{port}->read_const_time + $bytes * $self->{char_time};
     }
     croak "Timeout reading from port" unless $timeout > 0;
+    say STDERR "Pattern: $pattern Requested bytes: $bytes_qty Read: $bytes > " . join '-', unpack $pattern, $read;
     return unpack $pattern, $read;
 }
 
