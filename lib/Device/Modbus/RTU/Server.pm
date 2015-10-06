@@ -38,6 +38,9 @@ sub start {
 
     my $error;
     while ($self->{running}) {
+        my $read = $self->read_port;
+        next unless $read;
+
         my $req_adu;
         my $redo = 0;
         try {
@@ -46,7 +49,7 @@ sub start {
         }
         catch {
             unless ($_ =~ /^Timeout/) {
-                $self->log(2, "Error while receiving a request: $_");
+                $self->log(2, "Error while receiving a request");
                 $redo++;
             }
             $error = $_;
@@ -55,7 +58,7 @@ sub start {
 
         # If it is an exception object, we're done
         if ($req_adu->message->isa('Device::Modbus::Exception')) {
-            $self->log(3, "Exception while waiting for requests: $error");
+            $self->log(3, "Exception while waiting for requests");
             $self->write_port($req_adu);
             next;
         }

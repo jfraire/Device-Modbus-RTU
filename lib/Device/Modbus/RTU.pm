@@ -54,18 +54,11 @@ sub open_port {
 }
 
 sub read_port {
-    my ($self, $bytes_qty, $pattern) = @_;
-    my $timeout = 1000 * $self->{timeout};
-    my $bytes;
-    my $read;
-    while ($timeout > 0) {
-        ($bytes, $read) = $self->{port}->read($bytes_qty);
-        last if $bytes == $bytes_qty;
-        $timeout -= $self->{port}->read_const_time + $bytes * $self->{char_time};
-    }
-    croak "Timeout reading from port" unless $timeout > 0;
-    say STDERR "Pattern: $pattern Requested bytes: $bytes_qty Read: $bytes > " . join '-', unpack $pattern, $read;
-    return unpack $pattern, $read;
+    my $self = shift;
+    my ($bytes, $read) = $self->{port}->read(255);
+    # say STDERR "> " . join '-', unpack 'C*', $read;
+    $self->{buffer} = $read;
+    return $read;
 }
 
 sub write_port {
@@ -79,6 +72,11 @@ sub disconnect {
 }
 
 #### Modbus RTU Operations
+
+sub parse_buffer {
+    my ($self, $bytes, $pattern) = @_;
+    return unpack $pattern, substr $self->{buffer},0,$bytes,'';
+}
 
 sub new_adu {
     my ($self, $msg) = @_;
@@ -94,14 +92,14 @@ sub new_adu {
 
 sub parse_header {
     my ($self, $adu) = @_;
-    my $unit = $self->read_port(1, 'C');
+    my $unit = $self->parse_buffer(1, 'C');
     $adu->unit($unit);
     return $adu;
 }
 
 sub parse_footer {
     my ($self, $adu) = @_;
-    my $crc = $self->read_port(2, 'v');
+    my $crc = $self->parse_buffer(2, 'v');
     $adu->crc($crc);
     return $adu;
 }
