@@ -75,6 +75,8 @@ sub disconnect {
 
 sub parse_buffer {
     my ($self, $bytes, $pattern) = @_;
+    croak "Timeout error" unless
+        defined $self->{buffer} && length($self->{buffer}) >= $bytes;    
     return unpack $pattern, substr $self->{buffer},0,$bytes,'';
 }
 

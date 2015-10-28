@@ -13,9 +13,9 @@ my $client = Device::Modbus::RTU::Client->new(
 );
 
 my $req = $client->read_holding_registers(
-    unit     => 3,
+    unit     => 4,
     address  => 0,
-    quantity => 2
+    quantity => 2,
 );
 
 say "->" . Dumper $req;
