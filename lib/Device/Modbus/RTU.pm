@@ -114,9 +114,33 @@ __END__
 
 Device::Modbus::RTU - Perl distribution to implement Modbus RTU communications
 
+=head1 SYNOPSIS
+
+ #! /usr/bin/env perl
+
+ use Device::Modbus::RTU::Client;
+ use strict;
+ use warnings;
+ use v5.10;
+ 
+ my $client = Device::Modbus::RTU::Client->new(
+    port     => '/dev/ttyUSB0',
+    baudrate => 19200,
+    parity   => 'none',
+ );
+ 
+ my $req = $client->read_holding_registers(
+    unit     => 4,
+    address  => 0,
+    quantity => 2,
+ );
+
+ $client->send_request($req);
+ my $resp = $client->receive_response;
+
 =head1 DESCRIPTION
 
-This distribution implements the Modbus RTU protocol on top of Device::Modbus.
+This distribution implements the Modbus RTU protocol on top of L<Device::Modbus>. It includes both a client and a server, L<Device::Modbus::RTU::Client> and L<Device::Modbus::RTU::Server>.
 
 =head1 SEE ALSO
 
@@ -127,7 +151,7 @@ L<Protocol::Modbus>, L<MBclient>, L<mbserverd|https://github.com/sourceperl/mbse
 
 =head1 GITHUB REPOSITORY
 
-You can find the repository of this distribution in L<GitHub|https://github.com/jfraire/Device-Modbus>.
+You can find the repository of this distribution in L<GitHub|https://github.com/jfraire/Device-Modbus-RTU>.
 
 =head1 AUTHOR
 

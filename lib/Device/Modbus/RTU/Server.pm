@@ -121,3 +121,137 @@ sub log {
 }
 
 1;
+
+
+__END__
+
+=head1 NAME
+
+Device::Modbus::RTU::Server - Perl server for Modbus RTU communications
+
+=head1 SYNOPSIS
+
+ #! /usr/bin/env perl
+ 
+ use Device::Modbus::RTU::Server;
+ use strict;
+ use warnings;
+ use v5.10;
+ 
+ # This simple server can be tested with an Arduino with the
+ # program 'arduino_client.ino' in the examples directory
+ 
+ 
+ {
+    package My::Unit;
+    our @ISA = ('Device::Modbus::Unit');
+ 
+    sub init_unit {
+        my $unit = shift;
+ 
+        #                Zone            addr qty   method
+        #           -------------------  ---- ---  ---------
+        $unit->get('holding_registers',    2,  1,  'get_addr_2');
+    }
+ 
+    sub get_addr_2 {
+        my ($unit, $server, $req, $addr, $qty) = @_;
+        say "Executed server routine for address 2, 1 register";
+        return 6;
+    }
+ }
+ 
+ 
+ my $server = Device::Modbus::RTU::Server->new(
+    port      =>  '/dev/ttyACM0',
+    baudrate  => 9600,
+    parity    => 'none',
+    log_level => 4
+ );
+ 
+ my $unit = My::Unit->new(id => 3);
+ $server->add_server_unit($unit);
+ 
+ $server->start;
+
+=head1 DESCRIPTION
+
+This module is part of L<Device::Modbus::RTU>, a distribution which implements the Modbus RTU protocol on top of L<Device::Modbus>.
+
+Device::Modbus::RTU::Server inherits from L<Device::Modbus::Server>, and adds the capability of communicating via the serial port. As such, Device::Modbus::RTU::Server implements the constructor and a logging method. Please see L<Device::Modbus::Server> for most of the server-related documentation.
+
+=head1 METHODS
+
+=head2 new
+
+This method opens the serial port to communicate using the Modbus RTU protocol. It takes the following arguments:
+
+=over
+
+=item port
+
+The serial port to open.
+
+=item log_level
+
+A number between 0 and 4, where 0 will log only emergencies and 4 will produce sufficient output for debugging. Default is 2.
+
+=item baudrate
+
+A valid baud rate. Defaults to 9600 bps.
+
+=item databits
+
+An integer from 5 to 8. Defaults to 8.
+
+=item parity
+
+Either 'even', 'odd' or 'none'. Defaults to 'none'.
+
+=item stopbits
+
+1 or 2. Defaults to 1.
+
+=item timeout
+
+Defaults to 10 (seconds).
+
+=back
+
+=head2 disconnect
+
+This method closes the serial port, but it is called automatically for you when the server is shut down with a SIG_INT.
+
+=head2 log, log_level
+
+This module will log messages to STDERR. The level of logging is set with the C<log_level> argument to the constructor method. The logging level may be changed also with the method C<log_level>.
+
+C<log> takes two arguments: The level of a message and the message itself:
+
+ $server->log(3, 'This is the text to log');
+
+=head1 SEE ALSO
+
+Most of the functionality is described in L<Device::Modbus::Server>.
+
+=head2 Other distributions
+
+These are other implementations of Modbus in Perl which may be well suited for your application:
+L<Protocol::Modbus>, L<MBclient>, L<mbserverd|https://github.com/sourceperl/mbserverd>.
+
+=head1 GITHUB REPOSITORY
+
+You can find the repository of this distribution in L<GitHub|https://github.com/jfraire/Device-Modbus-RTU>.
+
+=head1 AUTHOR
+
+Julio Fraire, E<lt>julio.fraire@gmail.comE<gt>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2015 by Julio Fraire
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.14.2 or,
+at your option, any later version of Perl 5 you may have available.
+
+=cut
