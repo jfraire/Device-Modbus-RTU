@@ -47,8 +47,6 @@ This module requires these other non-standard modules and libraries:
 
 =item * Role::Tiny
 
-=item * Try::Tiny
-
 =back
 
 =head2 SEE ALSO

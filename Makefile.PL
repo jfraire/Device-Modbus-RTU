@@ -7,7 +7,6 @@ WriteMakefile(
     VERSION_FROM      => 'lib/Device/Modbus/RTU.pm',
     PREREQ_PM         => {
 		'Device::Modbus'     => 0.02,
-		'Try::Tiny'          => 0.22,
 		'Role::Tiny'         => 2.0,
 		'Device::SerialPort' => 1.04,
 	},
