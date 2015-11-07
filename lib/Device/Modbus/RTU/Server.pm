@@ -1,7 +1,6 @@
 package Device::Modbus::RTU::Server;
 
 use parent 'Device::Modbus::Server';
-use Try::Tiny;
 use Role::Tiny::With;
 use Data::Dumper;
 use Carp;
@@ -38,23 +37,23 @@ sub start {
 
     my $error;
     while ($self->{running}) {
-        my $read = $self->read_port;
-        next unless $read;
 
         my $req_adu;
-        my $redo = 0;
-        try {
+        eval {
             $req_adu = $self->receive_request;
-            $self->log(4, "> " . Dumper $req_adu);
-        }
-        catch {
-            unless ($_ =~ /^Timeout/) {
-                $self->log(2, "Error while receiving a request");
-                $redo++;
-            }
-            $error = $_;
         };
-        next if $redo;
+
+        if ($@) {
+            unless ($@ =~ /^Timeout/) {
+                $self->log(2, "Error while receiving a request");
+            }
+            else {
+                next;
+            }
+        }
+
+        next unless defined $req_adu->message;
+        $self->log(4, "> " . Dumper $req_adu);
 
         # If it is an exception object, we're done
         if ($req_adu->message->isa('Device::Modbus::Exception')) {
