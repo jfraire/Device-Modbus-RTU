@@ -32,9 +32,9 @@ sub read {
     my ($self, $chars) = @_;
     my $string = shift @rx_buffer;
     $string //= '';
-    say STDERR "# Reading from serial port: ",
-        join '-', unpack 'H*', $string
-        if $string;
+#    say STDERR "# Reading from serial port: ",
+#        join '-', unpack 'H*', $string
+#        if $string;
     return length $string, $string;
 }
 
