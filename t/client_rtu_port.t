@@ -12,7 +12,7 @@ BEGIN {
 
 # Loads the fake serial port from t/lib
 my $client = Device::Modbus::RTU::Client->new( port => 'test' );
-isa_ok $client->{port}, 'Test::Device::SerialPort';
+isa_ok $client->{port}, 'Device::SerialPort';
 
 {
     my $request = Device::Modbus::RTU::Client->read_coils(
@@ -24,8 +24,8 @@ isa_ok $client->{port}, 'Test::Device::SerialPort';
     my $adu = Device::Modbus::RTU::Client->new_adu($request);
 
     $client->write_port($adu);
-    is $client->{port}{_tx_buf}, $adu->binary_message,
-        'Writing to the serial port should work';
+    is(Device::SerialPort->get_test_string, $adu->binary_message,
+        'Writing to the serial port should work')   ;
     is $client->disconnect, 1,
         'Disconnecting the serial port should work';
 }

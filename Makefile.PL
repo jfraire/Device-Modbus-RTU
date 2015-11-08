@@ -10,9 +10,6 @@ WriteMakefile(
 		'Role::Tiny'         => 2.0,
 		'Device::SerialPort' => 1.04,
 	},
-	BUILD_REQUIRES    => {
-		'Test::Device::SerialPort' => 0.0501,
-	},
     ABSTRACT_FROM     => 'lib/Device/Modbus/RTU.pm',
     AUTHOR            => 'Julio Fraire <julio.fraire@gmail.com>',
     LICENSE           => 'artistic_2',

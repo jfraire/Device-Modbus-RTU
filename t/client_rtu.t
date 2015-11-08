@@ -73,14 +73,14 @@ BEGIN {
 
 ##### Parsing a response
 my $client = Device::Modbus::RTU::Client->new( port => 'test' );
-isa_ok $client->{port}, 'Test::Device::SerialPort';
+isa_ok $client->{port}, 'Device::SerialPort';
 
 {
     my $response = '0103cd6b05';          # Read coils
     my $pdu = pack 'H*', "06$response";   # Unit 6
     my $crc = Device::Modbus::RTU::ADU->crc_for($pdu);
     my $adu = $pdu . $crc;
-    $client->{port}->mock_messages($adu);
+    $client->{port}->add_test_strings($adu);
     my $resp_adu = $client->receive_response;
     ok $resp_adu->success,                    'Parsed ADU without error';
     is $resp_adu->unit, 0x06,                 'Unit value retrieved is 0x06';

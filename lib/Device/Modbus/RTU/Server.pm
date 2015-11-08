@@ -35,7 +35,6 @@ sub start {
     $self->open_port;
     $self->{running} = 1;
 
-    my $error;
     while ($self->{running}) {
 
         my $req_adu;
@@ -45,14 +44,15 @@ sub start {
 
         if ($@) {
             unless ($@ =~ /^Timeout/) {
-                $self->log(2, "Error while receiving a request");
+                $self->log(2, "Error while receiving a request: $@");
+                next;
             }
             else {
                 next;
             }
         }
 
-        next unless defined $req_adu->message;
+        next unless defined $req_adu && defined $req_adu->message;
         $self->log(4, "> " . Dumper $req_adu);
 
         # If it is an exception object, we're done
