@@ -7,7 +7,6 @@ use Role::Tiny::With;
 use Carp;
 use strict;
 use warnings;
-use v5.10;
 
 with 'Device::Modbus::RTU';
 

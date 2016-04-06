@@ -1,4 +1,4 @@
-=head1 NAME Device-Modbus-RTU version 0.02
+=head1 NAME Device-Modbus-RTU version 0.021
 
 This distribution aims towards implementing the Modbus protocol over serial lines, in its RTU variant in Perl. It should make it possible to write Modbus RTU clients and servers.
 
@@ -6,7 +6,7 @@ In particular, servers should be able to execute arbitrary code to process reque
 
 =head2 CURRENT STATUS
 
-Currently, the distribution is under development, and it is in the process of being re-written. You can find more information at http://www.7mavida.com/tag/Device::Modbus
+Currently, the distribution is under development. You can find more information at http://www.7mavida.com/tag/Device::Modbus
 
 =head2 MILESTONES
 
@@ -26,7 +26,7 @@ Currently, the distribution is under development, and it is in the process of be
 
 =back
 
-As of today, simple clients and servers both with Modbus RTU and Modbus TCP have been tested. Only the Modbus RTU clients have been tested with industrial equipment.
+As of today, simple clients and servers both with Modbus RTU and Modbus TCP have been tested. Only the clients have been tested with industrial equipment.
 
 =head2 INSTALLATION
 

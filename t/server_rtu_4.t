@@ -1,8 +1,7 @@
-use Test::More tests => 8;
+use Test::More;
 use lib 't/lib';
 use strict;
 use warnings;
-use v5.10;
 
 BEGIN {
     use_ok 'Device::Modbus::RTU::Server';
@@ -32,7 +31,7 @@ alarm(1);
  
    sub get_addr_2 {
        my ($unit, $server, $req, $addr, $qty) = @_;
-       say "Executed server routine for address 2, 1 register";
+       print "Executed server routine for address 2, 1 register\n";
        return 6;
    }
 }
@@ -52,17 +51,16 @@ isa_ok $unit, 'Device::Modbus::Unit';
 
 # Add test request to fake serial port:
 # Get an exception
-# Request an unsupported function to unit number 3
-Device::SerialPort->add_test_strings(pack 'H*', '03120003ff007676');
+# Send request to non-existing unit
+Device::SerialPort->add_test_strings(pack 'H*', '01050003ff007676');
 
 $server->start;
 
 # Alarm stops the server. Test for logging:
-like $out, qr/Starting server/,           'Server started';
-like $out, qr/Exception while waiting/,   'Unsupported function';
-like $out, qr/Device::Modbus::Exception/, 'Server returned an exception';
-like $out, qr/Server is shutting down/,   'Server shuts down';
-like $out, qr/Server is down/,            'Disconnection was logged';
+like   $out, qr/Starting server/,           'Server started';
+unlike $out, qr/Routing 'write'/,           'Request was ignored';
+like   $out, qr/Server is shutting down/,   'Server shuts down';
+like   $out, qr/Server is down/,            'Disconnection was logged';
 
 # note $out;
 

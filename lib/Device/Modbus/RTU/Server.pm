@@ -6,7 +6,6 @@ use Data::Dumper;
 use Carp;
 use strict;
 use warnings;
-use v5.10;
 
 with 'Device::Modbus::RTU';
 
@@ -63,7 +62,7 @@ sub start {
         }
 
         # Process request
-        my $resp = $self->modbus_server($req_adu);
+        my $resp = $self->modbus_server($req_adu) || next;
         my $resp_adu = $self->new_adu($resp);
         $resp_adu->unit($req_adu->unit);
         $self->log(4, "< " . Dumper $resp_adu);
